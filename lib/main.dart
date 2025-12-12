@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sports_diary/core/theme/app_theme.dart';
 import 'package:sports_diary/presentation/features/calendar/view/calendar_screen.dart';
 import 'package:sports_diary/presentation/features/profile/view/profile_screen.dart';
 import 'package:sports_diary/presentation/features/programs/view/program_screen.dart';
@@ -41,10 +42,11 @@ class WorkoutDiaryApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'Workout Diary',
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-        useMaterial3: true,
-      ),
+      // theme: ThemeData(
+      //   primarySwatch: Colors.indigo,
+      //   useMaterial3: true,
+      // ),
+      theme: darkTheme,
       home: Scaffold(
         body: IndexedStack(
           index: currentIndex,
