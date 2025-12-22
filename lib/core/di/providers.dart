@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive/hive.dart';
+import 'package:sports_diary/data/repositories/profile_repository_impl.dart';
 import 'package:sports_diary/data/repositories/program_repository_impl.dart';
 import 'package:sports_diary/data/repositories/training_repository_impl.dart';
 import 'package:sports_diary/domain/entities/exercise.dart';
+import 'package:sports_diary/domain/repositories/profile_repository.dart';
 import 'package:sports_diary/domain/repositories/program_repository.dart';
 import 'package:sports_diary/domain/repositories/training_repository.dart';
+import 'package:sports_diary/presentation/features/profile/viewmodel/profile_viewmodel.dart';
 import 'package:sports_diary/presentation/features/programs/viewmodel/exercise_add_viewmodel.dart';
 import 'package:sports_diary/presentation/features/programs/viewmodel/program_viewmodel.dart';
 import 'package:sports_diary/presentation/features/programs/viewmodel/training_viewmodel.dart';
@@ -36,7 +39,7 @@ ChangeNotifierProvider.family<ProgramEditViewModel, Program?>((ref, program) {
   if (program == null) vm.startCreate();
   else vm.startEdit(program);
   ref.onDispose(() => vm.dispose());
-  return vm;
+  return vm; 
 });
 
 
@@ -70,4 +73,19 @@ ChangeNotifierProvider.autoDispose.family<ExerciseAddViewModel, Exercise?>(
     return vm;
   },
 );
+
+
+final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
+  final settingsBox = Hive.box('settings');
+  return ProfileRepositoryImpl(settingsBox: settingsBox);
+});
+
+final profileViewModelProvider = ChangeNotifierProvider<ProfileViewModel>((ref) {
+  final repo = ref.read(profileRepositoryProvider);
+  final vm = ProfileViewModel(repo: repo);
+  vm.load();
+  ref.onDispose(() {
+  });
+  return vm;
+});
 
