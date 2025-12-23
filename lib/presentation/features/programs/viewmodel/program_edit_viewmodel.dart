@@ -11,12 +11,17 @@ class ProgramEditViewModel extends ChangeNotifier {
   String name = '';
   List<Training> trainings = [];
 
+  int cycleDays = 7;
+  List<String?> schedule = [];
+
   ProgramEditViewModel({required this.repo});
 
   void startCreate() {
     editing = null;
     name = '';
     trainings = [];
+    cycleDays = 7;
+    schedule = List<String?>.filled(cycleDays, null);
     notifyListeners();
   }
 
@@ -24,6 +29,8 @@ class ProgramEditViewModel extends ChangeNotifier {
     editing = program;
     name = program.name;
     trainings = program.trainings.map((d) => d.copyWith()).toList();
+    cycleDays = program.cycleDays;
+    schedule = program.schedule.map((id) => trainings.any((t) => t.id == id) ? id : null).toList();
     notifyListeners();
   }
 
@@ -43,7 +50,27 @@ class ProgramEditViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCycleDays(int days) {
+    if (days < 1) return;
+    cycleDays = days;
+    if (schedule.length != days) {
+      if (schedule.length > days) schedule = schedule.sublist(0, days);
+      else schedule = [...schedule, ...List<String?>.filled(days - schedule.length, null)];
+    }
+    notifyListeners();
+  }
+
+  void assignTrainingToDay(int dayIndex, String? trainingId) {
+    if (dayIndex < 0 || dayIndex >= cycleDays) return;
+    schedule[dayIndex] = trainingId;
+    notifyListeners();
+  }
+
   Future<void> save() async {
+    if (schedule.isEmpty || schedule[0] == null) {
+      throw Exception('В первый день цикла должна быть назначена тренировка');
+    }
+
     if (editing == null) {
       final id = DateTime.now().microsecondsSinceEpoch.toString();
       final program = Program(
@@ -51,6 +78,8 @@ class ProgramEditViewModel extends ChangeNotifier {
         name: name.trim(),
         trainings: trainings,
         createdAt: DateTime.now(),
+        cycleDays: cycleDays,
+        schedule: List<String?>.from(schedule),
       );
       await repo.save(program);
       editing = program;
@@ -83,6 +112,8 @@ class ProgramEditViewModel extends ChangeNotifier {
     final updated = editing!.copyWith(
       name: name.trim(),
       trainings: mergedTrainings,
+      cycleDays: cycleDays,
+      schedule: List<String?>.from(schedule),
       updatedAt: DateTime.now(),
     );
 
