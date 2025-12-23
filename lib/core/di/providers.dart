@@ -8,6 +8,7 @@ import 'package:sports_diary/domain/entities/exercise.dart';
 import 'package:sports_diary/domain/repositories/profile_repository.dart';
 import 'package:sports_diary/domain/repositories/program_repository.dart';
 import 'package:sports_diary/domain/repositories/training_repository.dart';
+import 'package:sports_diary/presentation/features/calendar/viewmodel/calendar_viewmodel.dart';
 import 'package:sports_diary/presentation/features/profile/viewmodel/profile_viewmodel.dart';
 import 'package:sports_diary/presentation/features/programs/viewmodel/exercise_add_viewmodel.dart';
 import 'package:sports_diary/presentation/features/programs/viewmodel/program_viewmodel.dart';
@@ -88,4 +89,17 @@ final profileViewModelProvider = ChangeNotifierProvider<ProfileViewModel>((ref) 
   });
   return vm;
 });
+
+
+final calendarViewModelProvider =
+ChangeNotifierProvider.family.autoDispose<CalendarViewModel, String>(
+      (ref, programId) {
+    final repo = ref.read(programRepositoryProvider);
+    final settingsBox = Hive.box('settings');
+    final vm = CalendarViewModel(repo: repo, settingsBox: settingsBox, programId: programId);
+    vm.load();
+    ref.onDispose(() => vm.dispose());
+    return vm;
+  },
+);
 
